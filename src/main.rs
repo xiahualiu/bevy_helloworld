@@ -1,10 +1,8 @@
-use bevy::{core_pipeline::clear_color::ClearColorConfig, prelude::*, transform::commands};
-use bevy::sprite::MaterialMesh2dBundle;
+use bevy::{core_pipeline::clear_color::ClearColorConfig, prelude::*};
 use paddle::{move_paddle, PaddleBundle};
 use wall::WallBundle;
 use wall::WallLocation;
 use ball::{move_ball, BallBundle};
-use collider::Collider;
 
 // Add modules
 mod ball;
@@ -19,8 +17,8 @@ const BACKGROUND_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
 fn setup(
     mut commands: Commands,
     mut windows: Query<&mut Window>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>)
+    meshes: ResMut<Assets<Mesh>>,
+    materials: ResMut<Assets<ColorMaterial>>)
 {
     // Set windows size
     let mut window = windows.single_mut();

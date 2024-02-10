@@ -1,22 +1,32 @@
 use bevy::prelude::*;
-use crate::collider::Collider;
 use bevy::sprite::MaterialMesh2dBundle;
+use crate::{collider::Collider, schedule::InGameSet};
 
 // We set the z-value of the ball to 1 so it renders on top in the case of overlapping sprites.
-pub const BALL_STARTING_POSITION: Vec3 = Vec3::new(0.0, -300.0, 1.0);
-pub const BALL_DIAMETER: f32 = 20.0;
-pub const BALL_SPEED: f32 = 400.0;
-pub const INITIAL_BALL_DIRECTION: Vec2 = Vec2::new(0.0, 1.0);
+const BALL_STARTING_POSITION: Vec3 = Vec3::new(50.0, -320.0, 1.0);
+const BALL_DIAMETER: f32 = 20.0;
+const BALL_SPEED: f32 = 400.0;
+const INITIAL_BALL_DIRECTION: Vec2 = Vec2::new(0.5, 0.001);
 
-pub const BALL_COLOR: Color = Color::rgb(1.0, 0.5, 0.5);
+const BALL_COLOR: Color = Color::rgb(1.0, 0.5, 0.5);
+
+pub struct BallPlugin;
+
+impl Plugin for BallPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, spawn_ball)
+            .add_systems(Update, move_ball.in_set(InGameSet::EntityUpdates));
+    }
+}
 
 #[derive(Component)]
 pub struct Ball {
-    velocity: Vec2
+    pub velocity: Vec2,
+    pub last_col_entity: Entity
 }
 
 #[derive(Bundle)]
-pub struct BallBundle{
+struct BallBundle{
     mesh: MaterialMesh2dBundle<ColorMaterial>,
     ball: Ball,
     collider: Collider
@@ -35,13 +45,16 @@ impl BallBundle {
                     .with_scale(Vec2::splat(BALL_DIAMETER).extend(1.)),
                 ..default()
             },
-            ball: Ball {velocity: INITIAL_BALL_DIRECTION*BALL_SPEED},
+            ball: Ball {
+                velocity: INITIAL_BALL_DIRECTION.normalize()*BALL_SPEED,
+                last_col_entity: Entity::PLACEHOLDER,
+            },
             collider: Collider,
         }
     }
 }
 
-pub fn move_ball(
+fn move_ball(
     mut query: Query<(&mut Transform, &mut Ball)>,
     time: Res<Time>) 
 {
@@ -49,4 +62,13 @@ pub fn move_ball(
         transform.translation.x += ball.velocity.x * time.delta_seconds();
         transform.translation.y += ball.velocity.y * time.delta_seconds();
     }
+}
+
+// Spawn a ball
+fn spawn_ball(
+    mut commands: Commands,
+    meshes: ResMut<Assets<Mesh>>,
+    materials: ResMut<Assets<ColorMaterial>>
+) {
+    commands.spawn(BallBundle::new(meshes, materials));
 }

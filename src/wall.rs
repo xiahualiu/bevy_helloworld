@@ -11,17 +11,18 @@ pub const TOP_WALL: f32 = 360.0;
 // Wall color
 const WALL_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 
-#[derive(Bundle)]
-pub struct WallBundle {
-    sprite_bundle: SpriteBundle,
-    collider: collider::Collider,
-}
-
 pub enum WallLocation {
     Left,
     Right,
-    Bottom,
     Top
+}
+
+pub struct WallPlugin;
+
+impl Plugin for WallPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, spawn_wall);
+    }
 }
 
 impl WallLocation {
@@ -30,7 +31,6 @@ impl WallLocation {
         match self {
             WallLocation::Left => Vec3 {x:LEFT_WALL+WALL_THICKNESS/2.0, y:1.0, z:0.0},
             WallLocation::Right => Vec3 {x:RIGHT_WALL-WALL_THICKNESS/2.0, y:0.0, z:0.0},
-            WallLocation::Bottom => Vec3 {x: 0.0, y:BOTTOM_WALL, z:0.0},
             WallLocation::Top  => Vec3 {x:0.0, y:TOP_WALL-WALL_THICKNESS/2.0, z: 0.0},
         }
     }
@@ -41,12 +41,16 @@ impl WallLocation {
         match self {
             WallLocation::Left => Vec3 { x: WALL_THICKNESS, y: arena_height, z: 1.0 },
             WallLocation::Right => Vec3 { x: WALL_THICKNESS, y: arena_height, z: 1.0 },
-            WallLocation::Bottom => Vec3 { x: arena_width, y: WALL_THICKNESS, z: 1.0 },
             WallLocation::Top => Vec3 { x: arena_width, y: WALL_THICKNESS, z: 1.0 },
         }
     }
 }
 
+#[derive(Bundle)]
+pub struct WallBundle {
+    sprite_bundle: SpriteBundle,
+    collider: collider::Collider,
+}
 
 impl WallBundle {
     pub fn new(location: WallLocation) -> WallBundle {
@@ -66,4 +70,11 @@ impl WallBundle {
             collider: collider::Collider,
         }
     }
+}
+
+fn spawn_wall(mut commands: Commands) {
+    // Setup boundary walls
+    commands.spawn(WallBundle::new(WallLocation::Left));
+    commands.spawn(WallBundle::new(WallLocation::Right));
+    commands.spawn(WallBundle::new(WallLocation::Top));
 }

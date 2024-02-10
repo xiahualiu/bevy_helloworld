@@ -1,26 +1,40 @@
 use bevy::prelude::*;
+use crate::schedule::InGameSet;
 use crate::wall;
+use crate::collider::Collider;
 
 const PADDLE_SIZE: Vec3 = Vec3::new(120.0, 20.0, 0.0);
 const PADDLE_Y_OFFSET: f32 = -320.0;
 const PADDLE_SPEED: f32 = 500.0;
-// How close can the paddle get to the wall
 const PADDLE_PADDING: f32 = 10.0;
 const PADDLE_COLOR: Color = Color::rgb(0.3, 0.3, 0.7);
 
+pub struct PaddlePlugin;
+
+impl Plugin for PaddlePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, spawn_paddle)
+            .add_systems(Update, handle_input.in_set(InGameSet::UserInput))
+            .add_systems(Update, update_paddle.in_set(InGameSet::EntityUpdates));
+    }
+}
+
 #[derive(Component)]
-pub struct Paddle;
+pub struct Paddle {
+    direction: f32,
+}
 
 #[derive(Bundle)]
 pub struct PaddleBundle{
     paddle: Paddle,
     sprite: SpriteBundle,
+    collider: Collider,
 }
 
 impl PaddleBundle {
     pub fn new() -> PaddleBundle {
         PaddleBundle {
-            paddle: Paddle,
+            paddle: Paddle {direction: 0.0},
             sprite: SpriteBundle {
                 transform: Transform { 
                     translation: Vec3 { x: 0.0, y: PADDLE_Y_OFFSET, z: 0.0 },
@@ -32,35 +46,39 @@ impl PaddleBundle {
                     ..default()
                 },
                 ..default()
-            }
+            },
+            collider: Collider
         }
     }
 }
 
-pub fn move_paddle(
+fn spawn_paddle(mut commands: Commands) {
+        commands.spawn(PaddleBundle::new());
+}
+
+fn handle_input(
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<&mut Transform, With<Paddle>>,
-    time: Res<Time>
+    mut query: Query<&mut Paddle>,
 ) {
-    let mut paddle_transform = query.single_mut();
-    let mut direction = 0.0;
-
+    let mut paddle = query.single_mut();
     if keyboard_input.pressed(KeyCode::Left) {
-        direction -= 1.0;
+        paddle.direction = -1.0;
     }
-
     if keyboard_input.pressed(KeyCode::Right) {
-        direction += 1.0;
+        paddle.direction = 1.0;
     }
+    if !keyboard_input.any_pressed([KeyCode::Left, KeyCode::Right]) {
+        paddle.direction = 0.0;
+    }
+}
 
-    // Calculate the new horizontal paddle position based on player input
-    let new_paddle_position =
-        paddle_transform.translation.x + direction * PADDLE_SPEED * time.delta_seconds();
-
-    // Update the paddle position,
-    // making sure it doesn't cause the paddle to leave the arena
+fn update_paddle(
+    mut query: Query<(&mut Transform, &Paddle)>,
+    time: Res<Time>,
+) {
+    let (mut transform, paddle) = query.single_mut();
+    let new_paddle_position = transform.translation.x + paddle.direction * PADDLE_SPEED * time.delta_seconds();
     let left_bound = wall::LEFT_WALL + wall::WALL_THICKNESS / 2.0 + PADDLE_SIZE.x / 2.0 + PADDLE_PADDING;
     let right_bound = wall::RIGHT_WALL - wall::WALL_THICKNESS / 2.0 - PADDLE_SIZE.x / 2.0 - PADDLE_PADDING;
-
-    paddle_transform.translation.x = new_paddle_position.clamp(left_bound, right_bound);
+    transform.translation.x = new_paddle_position.clamp(left_bound, right_bound);
 }

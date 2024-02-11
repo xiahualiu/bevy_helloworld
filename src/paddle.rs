@@ -5,7 +5,7 @@ use crate::collider::Collider;
 
 const PADDLE_SIZE: Vec3 = Vec3::new(120.0, 20.0, 0.0);
 const PADDLE_Y_OFFSET: f32 = -320.0;
-const PADDLE_SPEED: f32 = 500.0;
+const PADDLE_SPEED: f32 = 360.0;
 const PADDLE_PADDING: f32 = 10.0;
 const PADDLE_COLOR: Color = Color::rgb(0.3, 0.3, 0.7);
 

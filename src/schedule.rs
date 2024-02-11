@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::state::GameState;
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub enum InGameSet {
@@ -20,6 +21,7 @@ impl Plugin for SchedulePlugin {
                 InGameSet::CollisionDetection,
                 InGameSet::DespawnEntities,
             ).chain()
+            .run_if(in_state(GameState::InGame))
         );
     }
 }

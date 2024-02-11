@@ -29,11 +29,8 @@ impl Plugin for ColliderPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CollisionEvent>();
         app.add_systems(Update,
-            (
-                check_for_collision,
-                handle_collision
-            ).chain().in_set(InGameSet::CollisionDetection)
-        );
+            (check_for_collision).in_set(InGameSet::CollisionDetection))
+            .add_systems(Update, handle_collision.in_set(InGameSet::CollisionDetection).run_if(on_event::<CollisionEvent>()));
     }
 }
 

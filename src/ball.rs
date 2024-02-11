@@ -3,10 +3,10 @@ use bevy::sprite::MaterialMesh2dBundle;
 use crate::{collider::Collider, schedule::InGameSet};
 
 // We set the z-value of the ball to 1 so it renders on top in the case of overlapping sprites.
-const BALL_STARTING_POSITION: Vec3 = Vec3::new(50.0, -320.0, 1.0);
+const BALL_STARTING_POSITION: Vec3 = Vec3::new(50.0, -200.0, 1.0);
 const BALL_DIAMETER: f32 = 20.0;
 const BALL_SPEED: f32 = 400.0;
-const INITIAL_BALL_DIRECTION: Vec2 = Vec2::new(0.5, 0.001);
+const INITIAL_BALL_DIRECTION: Vec2 = Vec2::new(0.5, 0.5);
 
 const BALL_COLOR: Color = Color::rgb(1.0, 0.5, 0.5);
 

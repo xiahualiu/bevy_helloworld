@@ -1,36 +1,45 @@
 use bevy::{app::AppExit, prelude::*};
 
 use crate::state::GameState;
-use crate::ui::assetloader::UiFont;
+use crate::ui::scoreboard::GameScore;
 
-pub struct MainMenuPlugin;
+pub struct EndMenuPlugin;
 
-impl Plugin for MainMenuPlugin {
+impl Plugin for EndMenuPlugin {
     fn build(&self, app: &mut App) {
         // Spawn
-        app.add_systems(OnEnter(GameState::MainMenu), spawn_main_menu);
-        app.add_systems(OnExit(GameState::MainMenu), despawn_main_menu);
+        app.add_systems(OnEnter(GameState::EndMenu), spawn_end_menu);
+        app.add_systems(OnExit(GameState::EndMenu), despawn_end_menu);
         app.add_systems(
             Update,
-            button_interaction.run_if(in_state(GameState::MainMenu)),
+            button_interaction.run_if(in_state(GameState::EndMenu)),
         );
     }
 }
 
 #[derive(Component)]
-struct MainMenu;
+struct EndMenu;
 
 #[derive(Component)]
-struct PlayButton;
+struct Button {
+    button_type: ButtonType,
+}
 
-#[derive(Component)]
-struct QuitButton;
+enum ButtonType {
+    RestartButton,
+    MainMenuButton,
+    QuitButton,
+}
 
-fn spawn_main_menu(mut commands: Commands, font_handle_res: Res<UiFont>) {
+fn spawn_end_menu(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    game_score: Res<GameScore>,
+) {
     // Main node
     commands
         .spawn((
-            MainMenu,
+            EndMenu,
             NodeBundle {
                 style: Style {
                     flex_direction: FlexDirection::Column,
@@ -42,7 +51,7 @@ fn spawn_main_menu(mut commands: Commands, font_handle_res: Res<UiFont>) {
                     ..default()
                 },
                 visibility: Visibility::Visible,
-                background_color: Color::ANTIQUE_WHITE.into(),
+                background_color: Color::rgba(0.98, 0.92, 0.84, 0.3).into(),
                 ..default()
             },
         ))
@@ -60,16 +69,15 @@ fn spawn_main_menu(mut commands: Commands, font_handle_res: Res<UiFont>) {
                         ..default()
                     },
                     visibility: Visibility::Visible,
-                    background_color: Color::ANTIQUE_WHITE.into(),
                     ..default()
                 })
                 .with_children(|parent| {
                     parent.spawn(TextBundle {
                         text: Text {
                             sections: vec![TextSection {
-                                value: String::from("Breakout"),
+                                value: String::from("Your Score: ") + &game_score.score.to_string(),
                                 style: TextStyle {
-                                    font: font_handle_res.0.clone(),
+                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                     font_size: 80.0,
                                     color: Color::GRAY,
                                 },
@@ -80,10 +88,12 @@ fn spawn_main_menu(mut commands: Commands, font_handle_res: Res<UiFont>) {
                         ..default()
                     });
                 });
-            // Spawn Play button
+            // Spawn Restart button
             parent
                 .spawn((
-                    PlayButton,
+                    Button {
+                        button_type: ButtonType::RestartButton,
+                    },
                     ButtonBundle {
                         style: Style {
                             width: Val::Px(300.0),
@@ -100,9 +110,44 @@ fn spawn_main_menu(mut commands: Commands, font_handle_res: Res<UiFont>) {
                     parent.spawn(TextBundle {
                         text: Text {
                             sections: vec![TextSection {
-                                value: String::from("Play"),
+                                value: String::from("Restart"),
                                 style: TextStyle {
-                                    font: font_handle_res.0.clone(),
+                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                    font_size: 40.0,
+                                    color: Color::BLUE,
+                                },
+                            }],
+                            alignment: TextAlignment::Center,
+                            ..default()
+                        },
+                        ..default()
+                    });
+                });
+            // Spawn MainMenu button
+            parent
+                .spawn((
+                    Button {
+                        button_type: ButtonType::MainMenuButton,
+                    },
+                    ButtonBundle {
+                        style: Style {
+                            width: Val::Px(300.0),
+                            height: Val::Px(100.0),
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
+                            ..default()
+                        },
+                        background_color: Color::YELLOW_GREEN.into(),
+                        ..default()
+                    },
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle {
+                        text: Text {
+                            sections: vec![TextSection {
+                                value: String::from("Main Menu"),
+                                style: TextStyle {
+                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                     font_size: 40.0,
                                     color: Color::BLUE,
                                 },
@@ -116,7 +161,9 @@ fn spawn_main_menu(mut commands: Commands, font_handle_res: Res<UiFont>) {
             // Spawn Quit button
             parent
                 .spawn((
-                    QuitButton,
+                    Button {
+                        button_type: ButtonType::QuitButton,
+                    },
                     ButtonBundle {
                         style: Style {
                             width: Val::Px(300.0),
@@ -135,7 +182,7 @@ fn spawn_main_menu(mut commands: Commands, font_handle_res: Res<UiFont>) {
                             sections: vec![TextSection {
                                 value: String::from("Quit"),
                                 style: TextStyle {
-                                    font: font_handle_res.0.clone(),
+                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                     font_size: 40.0,
                                     color: Color::BLUE,
                                 },
@@ -149,35 +196,27 @@ fn spawn_main_menu(mut commands: Commands, font_handle_res: Res<UiFont>) {
         });
 }
 
-fn despawn_main_menu(mut commands: Commands, window_query: Query<Entity, With<MainMenu>>) {
+fn despawn_end_menu(mut commands: Commands, window_query: Query<Entity, With<EndMenu>>) {
     let entity = window_query.get_single().unwrap();
     commands.entity(entity).despawn_recursive();
 }
 
 fn button_interaction(
     mut background_query: Query<
-        (
-            &Interaction,
-            &mut BackgroundColor,
-            Option<&PlayButton>,
-            Option<&QuitButton>,
-        ),
+        (&Interaction, &mut BackgroundColor, &Button),
         Changed<Interaction>,
     >,
     mut next_state: ResMut<NextState<GameState>>,
     mut app_exit_writer: EventWriter<AppExit>,
 ) {
-    for (interact, mut backgroundcolor, is_playbutton, is_quitbutton) in &mut background_query {
+    for (interact, mut backgroundcolor, button) in &mut background_query {
         match interact {
             Interaction::Hovered => *backgroundcolor = Color::ALICE_BLUE.into(),
-            Interaction::Pressed => {
-                if let Some(_) = is_playbutton {
-                    next_state.set(GameState::PrepGame);
-                }
-                if let Some(_) = is_quitbutton {
-                    app_exit_writer.send(AppExit);
-                }
-            }
+            Interaction::Pressed => match button.button_type {
+                ButtonType::RestartButton => next_state.set(GameState::PrepGame),
+                ButtonType::MainMenuButton => next_state.set(GameState::MainMenu),
+                ButtonType::QuitButton => app_exit_writer.send(AppExit),
+            },
             Interaction::None => *backgroundcolor = Color::YELLOW_GREEN.into(),
         }
     }

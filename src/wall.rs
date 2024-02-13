@@ -1,5 +1,6 @@
+use crate::collider::Collider;
+use crate::state::GameState;
 use bevy::prelude::*;
-use crate::collider;
 
 pub const WALL_THICKNESS: f32 = 10.0;
 // x coordinates
@@ -14,14 +15,30 @@ const WALL_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 pub enum WallLocation {
     Left,
     Right,
-    Top
+    Top,
 }
 
 pub struct WallPlugin;
 
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_wall);
+        app.add_systems(OnEnter(GameState::PrepGame), WallPlugin::spawn_wall)
+            .add_systems(OnExit(GameState::EndMenu), WallPlugin::despawn_wall)
+            .add_systems(OnEnter(GameState::MainMenu), WallPlugin::despawn_wall);
+    }
+}
+
+impl WallPlugin {
+    fn spawn_wall(mut commands: Commands) {
+        commands.spawn(WallBundle::new(WallLocation::Left));
+        commands.spawn(WallBundle::new(WallLocation::Right));
+        commands.spawn(WallBundle::new(WallLocation::Top));
+    }
+
+    fn despawn_wall(mut commands: Commands, query: Query<Entity, With<Wall>>) {
+        for wall in &query {
+            commands.entity(wall).despawn();
+        }
     }
 }
 
@@ -29,27 +46,55 @@ impl WallLocation {
     // Return the translation vec for the wall sprite
     pub fn position(&self) -> Vec3 {
         match self {
-            WallLocation::Left => Vec3 {x:LEFT_WALL+WALL_THICKNESS/2.0, y:1.0, z:0.0},
-            WallLocation::Right => Vec3 {x:RIGHT_WALL-WALL_THICKNESS/2.0, y:0.0, z:0.0},
-            WallLocation::Top  => Vec3 {x:0.0, y:TOP_WALL-WALL_THICKNESS/2.0, z: 0.0},
+            WallLocation::Left => Vec3 {
+                x: LEFT_WALL,
+                y: 1.0,
+                z: 0.0,
+            },
+            WallLocation::Right => Vec3 {
+                x: RIGHT_WALL,
+                y: 0.0,
+                z: 0.0,
+            },
+            WallLocation::Top => Vec3 {
+                x: 0.0,
+                y: TOP_WALL,
+                z: 0.0,
+            },
         }
     }
     // Return the size of the given wall sprite
     pub fn size(&self) -> Vec3 {
-        let arena_height = TOP_WALL - BOTTOM_WALL;
-        let arena_width = RIGHT_WALL - LEFT_WALL;
+        let arena_height = TOP_WALL - BOTTOM_WALL + WALL_THICKNESS;
+        let arena_width = RIGHT_WALL - LEFT_WALL + WALL_THICKNESS;
         match self {
-            WallLocation::Left => Vec3 { x: WALL_THICKNESS, y: arena_height, z: 1.0 },
-            WallLocation::Right => Vec3 { x: WALL_THICKNESS, y: arena_height, z: 1.0 },
-            WallLocation::Top => Vec3 { x: arena_width, y: WALL_THICKNESS, z: 1.0 },
+            WallLocation::Left => Vec3 {
+                x: WALL_THICKNESS,
+                y: arena_height,
+                z: 1.0,
+            },
+            WallLocation::Right => Vec3 {
+                x: WALL_THICKNESS,
+                y: arena_height,
+                z: 1.0,
+            },
+            WallLocation::Top => Vec3 {
+                x: arena_width,
+                y: WALL_THICKNESS,
+                z: 1.0,
+            },
         }
     }
 }
 
+#[derive(Component)]
+pub struct Wall;
+
 #[derive(Bundle)]
 pub struct WallBundle {
     sprite_bundle: SpriteBundle,
-    collider: collider::Collider,
+    collider: Collider,
+    wall: Wall,
 }
 
 impl WallBundle {
@@ -67,14 +112,8 @@ impl WallBundle {
                 },
                 ..default()
             },
-            collider: collider::Collider,
+            collider: Collider,
+            wall: Wall,
         }
     }
-}
-
-fn spawn_wall(mut commands: Commands) {
-    // Setup boundary walls
-    commands.spawn(WallBundle::new(WallLocation::Left));
-    commands.spawn(WallBundle::new(WallLocation::Right));
-    commands.spawn(WallBundle::new(WallLocation::Top));
 }

@@ -81,7 +81,7 @@ impl PauseMenuPlugin {
                                         color: Color::BLUE,
                                     },
                                 }],
-                                alignment: TextAlignment::Center,
+                                justify: JustifyText::Center,
                                 ..default()
                             },
                             ..default()
@@ -114,7 +114,7 @@ impl PauseMenuPlugin {
                                         color: Color::BLUE,
                                     },
                                 }],
-                                alignment: TextAlignment::Center,
+                                justify: JustifyText::Center,
                                 ..default()
                             },
                             ..default()

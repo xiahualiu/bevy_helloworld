@@ -17,7 +17,7 @@ pub struct StatePlugin;
 
 impl Plugin for StatePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state::<GameState>();
+        app.init_state::<GameState>();
         app.add_systems(Update, StatePlugin::in_game_input_events);
         app.add_systems(
             Update,
@@ -30,7 +30,7 @@ impl StatePlugin {
     fn in_game_input_events(
         mut next_state: ResMut<NextState<GameState>>,
         state: Res<State<GameState>>,
-        keyboard_input: Res<Input<KeyCode>>,
+        keyboard_input: Res<ButtonInput<KeyCode>>,
     ) {
         if keyboard_input.just_pressed(KeyCode::Escape) {
             match state.get() {

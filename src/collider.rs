@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::ball::Ball;
+use crate::ball::{Ball, BALL_DIAMETER};
 use crate::brick::{Brick, BrickLevel};
 use crate::paddle::Paddle;
 use crate::schedule::InGameSet;
@@ -29,10 +29,10 @@ impl ColliderPlugin {
         let wall_bottom = wall_transform.translation.y - wall_transform.scale.y / 2.0;
         let wall_left = wall_transform.translation.x - wall_transform.scale.x / 2.0;
         let wall_right = wall_transform.translation.x + wall_transform.scale.x / 2.0;
-        let ball_top = ball_transform.translation.y + ball_transform.scale.y / 2.0;
-        let ball_bottom = ball_transform.translation.y - ball_transform.scale.y / 2.0;
-        let ball_left = ball_transform.translation.x - ball_transform.scale.x / 2.0;
-        let ball_right = ball_transform.translation.x + ball_transform.scale.x / 2.0;
+        let ball_top = ball_transform.translation.y + BALL_DIAMETER/ 2.0;
+        let ball_bottom = ball_transform.translation.y - BALL_DIAMETER / 2.0;
+        let ball_left = ball_transform.translation.x - BALL_DIAMETER / 2.0;
+        let ball_right = ball_transform.translation.x + BALL_DIAMETER / 2.0;
         if ball_right < wall_left
             || ball_left > wall_right
             || ball_top < wall_bottom

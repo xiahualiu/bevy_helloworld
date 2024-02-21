@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
+use bevy::sprite::Mesh2dHandle;
 
 use crate::collider::Collider;
 use crate::schedule::InGameSet;
@@ -8,7 +9,7 @@ use crate::wall;
 
 // We set the z-value of the ball to 1 so it renders on top in the case of overlapping sprites.
 const BALL_STARTING_POSITION: Vec3 = Vec3::new(50.0, -200.0, 1.0);
-const BALL_DIAMETER: f32 = 20.0;
+pub const BALL_DIAMETER: f32 = 20.0;
 const BALL_SPEED: f32 = 400.0;
 const INITIAL_BALL_DIRECTION: Vec2 = Vec2::new(0.5, 0.5);
 const BALL_COLOR: Color = Color::rgb(1.0, 0.5, 0.5);
@@ -101,13 +102,12 @@ impl BallBundle {
     ) -> BallBundle {
         BallBundle {
             mesh: MaterialMesh2dBundle {
-                mesh: meshes.add(Mesh::from(shape::Circle::default())).into(),
+                mesh: Mesh2dHandle(meshes.add(Circle::new(BALL_DIAMETER/2.0))),
                 material: materials.add(ColorMaterial {
                     color: BALL_COLOR,
                     ..Default::default()
                 }),
-                transform: Transform::from_translation(BALL_STARTING_POSITION)
-                    .with_scale(Vec2::splat(BALL_DIAMETER).extend(1.)),
+                transform: Transform::from_translation(BALL_STARTING_POSITION),
                 ..default()
             },
             ball: Ball {

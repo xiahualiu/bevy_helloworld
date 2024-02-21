@@ -82,7 +82,7 @@ fn spawn_end_menu(
                                     color: Color::GRAY,
                                 },
                             }],
-                            alignment: TextAlignment::Center,
+                            justify: JustifyText::Center,
                             ..default()
                         },
                         ..default()
@@ -117,7 +117,7 @@ fn spawn_end_menu(
                                     color: Color::BLUE,
                                 },
                             }],
-                            alignment: TextAlignment::Center,
+                            justify: JustifyText::Center,
                             ..default()
                         },
                         ..default()
@@ -152,7 +152,7 @@ fn spawn_end_menu(
                                     color: Color::BLUE,
                                 },
                             }],
-                            alignment: TextAlignment::Center,
+                            justify: JustifyText::Center,
                             ..default()
                         },
                         ..default()
@@ -187,7 +187,7 @@ fn spawn_end_menu(
                                     color: Color::BLUE,
                                 },
                             }],
-                            alignment: TextAlignment::Center,
+                            justify: JustifyText::Center,
                             ..default()
                         },
                         ..default()
@@ -215,7 +215,9 @@ fn button_interaction(
             Interaction::Pressed => match button.button_type {
                 ButtonType::RestartButton => next_state.set(GameState::PrepGame),
                 ButtonType::MainMenuButton => next_state.set(GameState::MainMenu),
-                ButtonType::QuitButton => app_exit_writer.send(AppExit),
+                ButtonType::QuitButton => {
+                    app_exit_writer.send(AppExit);
+                }
             },
             Interaction::None => *backgroundcolor = Color::YELLOW_GREEN.into(),
         }

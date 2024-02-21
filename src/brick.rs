@@ -96,7 +96,7 @@ impl BrickPlugin {
         for (entity, brick) in &query {
             if let BrickLevel::NONE = brick.level {
                 commands.entity(entity).despawn();
-                update_score_event.send(UpdateScoreEvent { score: brick.score })
+                update_score_event.send(UpdateScoreEvent { score: brick.score });
             }
         }
     }

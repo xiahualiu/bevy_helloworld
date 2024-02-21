@@ -1,4 +1,3 @@
-use bevy::core_pipeline::clear_color::ClearColorConfig;
 use bevy::prelude::*;
 
 use crate::ui::scoreboard;
@@ -25,7 +24,7 @@ fn window_setup(mut commands: Commands, mut windows: Query<&mut Window>) {
 
     // Set camera
     commands.spawn(Camera2dBundle {
-        camera_2d: Camera2d {
+        camera: Camera {
             clear_color: ClearColorConfig::Custom(BACKGROUND_COLOR),
             ..default()
         },

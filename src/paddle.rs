@@ -39,15 +39,15 @@ impl PaddlePlugin {
         }
     }
 
-    fn handle_input(keyboard_input: Res<Input<KeyCode>>, mut query: Query<&mut Paddle>) {
+    fn handle_input(keyboard_input: Res<ButtonInput<KeyCode>>, mut query: Query<&mut Paddle>) {
         for mut paddle in &mut query {
-            if keyboard_input.pressed(KeyCode::Left) {
+            if keyboard_input.pressed(KeyCode::ArrowLeft) {
                 paddle.direction = -1.0;
             }
-            if keyboard_input.pressed(KeyCode::Right) {
+            if keyboard_input.pressed(KeyCode::ArrowRight) {
                 paddle.direction = 1.0;
             }
-            if !keyboard_input.any_pressed([KeyCode::Left, KeyCode::Right]) {
+            if !keyboard_input.any_pressed([KeyCode::ArrowLeft, KeyCode::ArrowRight]) {
                 paddle.direction = 0.0;
             }
         }

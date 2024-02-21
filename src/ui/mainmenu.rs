@@ -74,7 +74,7 @@ fn spawn_main_menu(mut commands: Commands, font_handle_res: Res<UiFont>) {
                                     color: Color::GRAY,
                                 },
                             }],
-                            alignment: TextAlignment::Center,
+                            justify: JustifyText::Center,
                             ..default()
                         },
                         ..default()
@@ -107,7 +107,7 @@ fn spawn_main_menu(mut commands: Commands, font_handle_res: Res<UiFont>) {
                                     color: Color::BLUE,
                                 },
                             }],
-                            alignment: TextAlignment::Center,
+                            justify: JustifyText::Center,
                             ..default()
                         },
                         ..default()
@@ -140,7 +140,7 @@ fn spawn_main_menu(mut commands: Commands, font_handle_res: Res<UiFont>) {
                                     color: Color::BLUE,
                                 },
                             }],
-                            alignment: TextAlignment::Center,
+                            justify: JustifyText::Center,
                             ..default()
                         },
                         ..default()
